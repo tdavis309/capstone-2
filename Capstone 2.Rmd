@@ -1,0 +1,263 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+tips <- read.csv('C:/Users/17735/Downloads/data analytics GC homework/tips.csv')
+```
+
+
+```{r}
+#lets start by cleaning the data 
+tips <- tips %>% drop_na()
+```
+
+
+```{r}
+#now I'm going to see how man males and females are in this data set
+sex <- tips %>% 
+  group_by(sex) %>%
+  summarize(
+    count = n(), 
+  )
+print(sex)
+
+#There are 87  females and 157 males.
+```
+
+
+```{r}
+#lets make a pie chart for this
+ggplot(sex, aes(x = "", y = sex, fill = sex)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Sex of Participants in Study") +
+  theme_void() +
+  theme(legend.position = "right")
+```
+
+
+```{r}
+view(tips)
+```
+
+
+```{r}
+#Here we're going to begin to dig into the information given about the bills
+
+highest_bill_entry <- tips %>%
+  filter(total_bill == max(total_bill))
+
+print(highest_bill_entry)
+
+#the highest bill was 50.81
+```
+
+
+```{r}
+lowest_bill_entry <-  tips %>% 
+  filter(total_bill == min(total_bill))
+print(lowest_bill_entry)
+#the lowest  bill was 3.07
+```
+
+
+```{r}
+ave_bill <- tips %>%
+  summarize(
+    mean_bill = mean(total_bill, na.rm = TRUE)
+  )
+print(ave_bill)
+#average bill was 19.78
+```
+
+
+```{r}
+#here i will start looking at the tips 
+highest_tip <- tips %>%
+  filter(tip == max(tip))
+print(highest_tip)
+#highest tip is 10
+```
+```{r}
+```
+
+
+```{r}
+lowest_tip <- tips %>%
+  filter(tip == min(tip))
+print(lowest_tip)
+#the lowest tip amount is 1 dollar paid 4 times 
+```
+
+```{r}
+ave_tip <- tips %>%
+  summarize(
+    mean_tip = mean(tip, na.rm = TRUE)
+  )
+print(ave_tip)
+#average tip is about 3 dollars
+```
+
+```{r}
+#looking to see which day had the most diners
+most_diners <- tips %>% 
+  group_by(day) %>%
+  summarize(
+    count = n(), 
+  )
+```
+
+
+```{r}
+day_with_most_diners <- most_diners %>%
+  filter(count == max(count))
+print(day_with_most_diners)
+```
+
+
+```{r}
+day_with_least_diners <- most_diners %>%
+  filter(count == min(count))
+print(day_with_least_diners)
+```
+```{r}
+#this is a major jump form the highest number of diners being Saturday at 87 and the lowest being Friday at 19. I wonder what the average number of dinners are per day
+
+ave_dine <- most_diners %>%
+  summarize(
+    mean_dine = mean(count, na.rm = TRUE)
+  )
+print(ave_dine)
+
+#the average amount for diners is 61, I wonder what happened on Friday.
+```
+```{r}
+ggplot(most_diners, aes(x = day, y = count)) +
+  geom_point(size = 4, color = 'blue') +
+  labs(title = "Number of Diners by Day",
+       x = "Day",
+       y = "Number of Diners") +
+  theme_minimal()
+```
+
+
+
+```{r}
+diners <- tips %>% 
+  group_by(day, sex) %>%
+  summarize(
+    count = n(), 
+  )
+print(diners)
+```
+
+
+```{r}
+#From looking at this data,I can see that Sat and & Sunday had the highest turn out for Males, while Thursday and Saturday were great days for female turn out. Also, Thursday was an even distribution of male & female turn out
+```
+
+
+```{r}
+#find a way to graph the male to female ratio per day
+summary_data <- tips %>%
+  group_by(day, sex) %>%
+  summarize(count = n(), .groups = 'drop')
+print(summary_data)
+
+```
+
+
+```{r}
+ggplot(summary_data, aes(x = day, y = count, fill = sex)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Number of Diners by Day and Sex",
+       x = "Day",
+       y = "Count",
+       fill = "Sex") +
+  theme_minimal()
+```
+
+
+```{r}
+#check which days had the most group reservations ... 3 or more
+
+diner_group <- tips %>%
+  filter(size >= 3) %>%
+  group_by(day) %>%
+  summarize(count = n(), .groups = 'drop')
+view(diner_group)
+
+#Even though Saturday has the highest amount of diners, Sunday has the highest amount of group diners (3 or more people in the party)
+```
+
+Analysis :
+
+Gender Distribution:
+
+There are 87 females and 157 males.
+This indicates that there are almost twice as many male diners as female diners in the dataset.
+
+Bill Amounts:
+
+The highest bill was $50.81.
+The lowest bill was $3.07.
+The average bill was $19.78.
+This suggests a wide range of dining expenses, with the average bill being around $20.
+
+Tip Amounts:
+
+The highest tip was $10.
+The lowest tip amount was $1, which was paid 4 times.
+The average tip was about $3.
+This indicates that most customers leave tips around 15% of the average bill.
+
+Dining by Day:
+
+Saturday has the most diners with 87.
+Friday has the fewest diners with 19.
+The average number of diners per day is 61.
+This large discrepancy suggests that weekends, especially Saturdays, are the busiest days for dining, while Fridays are relatively slow.
+Detailed Analysis
+
+Gender and Day Distribution:
+
+Saturdays and Sundays: Highest turnout for males.
+Thursdays and Saturdays: Highest turnout for females.
+Thursdays: Even distribution of male and female diners.
+This could indicate that different days of the week attract different demographics.
+Group Diners:
+
+Despite Saturdays having the highest number of diners, Sundays have the highest number of group diners (3 or more people per party).
+This suggests that Sundays may be preferred for family or group outings, while Saturdays could be popular for individual or smaller group dining.
+
+
+```{r}
+ggplot(tips, aes(x = total_bill)) +
+  geom_histogram(binwidth = 2, fill = 'blue', color = 'black') +
+  labs(title = "Histogram of Bill Amounts", x = "Total Bill", y = "Frequency") +
+  theme_minimal()
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
